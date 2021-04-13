@@ -10,7 +10,7 @@ test: build
 	docker run --rm --name ${CONTAINER_NAME} ${IMG_NAME}:${version}
 
 run: build
-	docker run -d -it --rm -p 80:80 \
+	docker run -d -it -p 80:80 \
 		--name ${CONTAINER_NAME} \
 		--mount type=bind,src=`pwd`/../app,dst=/app \
 		${IMG_NAME}:${version} /bin/bash
