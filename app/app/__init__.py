@@ -13,4 +13,4 @@ login = LoginManager(app)
 # Redirect users to login before accessing protected pages
 login.login_view = "login"
 
-from app import routes, models
+from app import routes, models, errors
