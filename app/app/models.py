@@ -71,7 +71,7 @@ class User(UserMixin, db.Model):
                                    .filter(followers.c.follower_id == self.id)
 
         # A user expects to find his own posts in his timeline
-        posts_owned = Post.query.filter_by(user_id == self.id)
+        posts_owned = Post.query.filter_by(user_id = self.id)
 
         # Create a union of the posts, ordered by the most recent one
         return posts_followed.union(posts_owned).order_by(Post.timestamp.desc())
