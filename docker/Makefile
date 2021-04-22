@@ -15,6 +15,9 @@ run: build
 		--mount type=bind,src=`pwd`/../app,dst=/app \
 		${IMG_NAME}:${version} /bin/bash
 
+start:
+	docker start ${CONTAINER_NAME}
+
 stop:
 	docker stop ${CONTAINER_NAME}
 
