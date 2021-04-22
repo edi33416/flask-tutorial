@@ -45,3 +45,16 @@ class EditProfileForm(FlaskForm):
         user = User.query.filter_by(username = username.data).first()
         if user is not None:
             raise ValidationError("Username is already taken")
+
+class EmptyFollowForm(FlaskForm):
+    """
+    Because the follow and unfollow actions introduce changes in the application,
+    we to implement them as POST requests, which are triggered from the web browser
+    as a result of submitting a web form. It would be easier to implement these routes
+    as GET requests, but then they could be exploited in CSRF attacks. Because GET
+    requests are harder to protect against CSRF, they should only be used on actions
+    that do not introduce state changes. Implementing these as a result of a form
+    submission is better because then a CSRF token can be added to the form.
+    """
+    submit = SubmitField('Submit')
+
