@@ -18,13 +18,25 @@ def index():
         db.session.add(post)
         db.session.commit()
         flash("Your post has been saved")
+
         # Post/Redirect/Get pattern
         # https://en.wikipedia.org/wiki/Post/Redirect/Get
         return redirect(url_for("index"))
 
-    posts = current_user.followed_posts().all()
+    # Paginate posts
+    # A page can be passed as a request argument
+    # Ex. /index?page=3
+    page = request.args.get(key = 'page', default = 1, type = int)
+    ret_404_on_empty_range = False
+    posts = current_user.followed_posts().paginate(page, app.config['POSTS_PER_PAGE'], ret_404_on_empty_range)
 
-    return render_template("index.html", title = "Test", posts = posts, form = form)
+    next_url = url_for("index", page = posts.next_num)\
+            if posts.has_next else None
+    prev_url = url_for("index", page = posts.prev_num)\
+            if posts.has_prev else None
+
+    return render_template("index.html", title = "Home", form = form,\
+            posts = posts.items, next_url = next_url, prev_url = prev_url)
 
 @app.route("/login", methods = ["GET", "POST"])
 def login():
@@ -79,11 +91,22 @@ def register():
 def user(username):
     form = EmptyFollowForm()
     user = User.query.filter_by(username = username).first_or_404()
-    posts = [
-        {"author": user, "body": "Test post #1"},
-        {"author": user, "body": "Test post #2"}
-    ]
-    return render_template("user.html", user = user, posts = posts, form = form)
+
+    # Paginate posts
+    # A page can be passed as a request argument
+    # Ex. /index?page=3
+    page = request.args.get(key = 'page', default = 1, type = int)
+    ret_404_on_empty_range = False
+    posts = user.posts.order_by(Post.timestamp.desc())\
+                .paginate(page, app.config['POSTS_PER_PAGE'], ret_404_on_empty_range)
+
+    next_url = url_for("user", username = username, page = posts.next_num)\
+            if posts.has_next else None
+    prev_url = url_for("user", username = username, page = posts.prev_num)\
+            if posts.has_prev else None
+
+    return render_template("user.html", user = user, form = form,\
+            posts = posts.items, next_url = next_url, prev_url = prev_url)
 
 @app.route("/edit_profile", methods = ["GET", "POST"])
 @login_required
@@ -151,5 +174,23 @@ def unfollow(username):
 @app.route("/explore")
 @login_required
 def explore():
-    posts = Post.query.order_by(Post.timestamp.desc()).all()
-    return render_template("index.html", title = "Explore", posts = posts)
+    # Paginate posts
+    # A page can be passed as a request argument
+    # Ex. /index?page=3
+    page = request.args.get(key = 'page', default = 1, type = int)
+    ret_404_on_empty_range = False
+    posts = Post.query.order_by(Post.timestamp.desc())\
+            .paginate(page, app.config['POSTS_PER_PAGE'], ret_404_on_empty_range)
+
+    next_url = url_for("explore", page = posts.next_num)\
+            if posts.has_next else None
+    prev_url = url_for("explore", page = posts.prev_num)\
+            if posts.has_prev else None
+
+    return render_template("index.html", title = "Explore", posts = posts.items,\
+            next_url = next_url, prev_url = prev_url)
+
+
+
+
+
