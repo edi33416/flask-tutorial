@@ -1,27 +1,30 @@
 from datetime import datetime
 
 from app import app, db
-from app.forms import LoginForm, RegistrationForm, EditProfileForm, EmptyFollowForm
-from app.models import User
+from app.forms import LoginForm, RegistrationForm, EditProfileForm, EmptyFollowForm, PostForm
+from app.models import User, Post
 
 from flask import render_template, redirect, flash, url_for, request
 from flask_login import current_user, login_user, logout_user, login_required
 from werkzeug.urls import url_parse
 
-@app.route("/")
-@app.route("/index")
+@app.route("/", methods = ["GET", "POST"])
+@app.route("/index", methods = ["GET", "POST"])
 @login_required
 def index():
-    user = { "username": "Edi" }
-    posts = [
-            { "author": { "username": "Aaa"},
-               "body": "Bla bla"
-            },
-            { "author": { "username": "Baa"},
-               "body": "Bla bla bla"
-            }]
+    form = PostForm()
+    if form.validate_on_submit():
+        post = Post(body = form.post.data, author = current_user)
+        db.session.add(post)
+        db.session.commit()
+        flash("Your post has been saved")
+        # Post/Redirect/Get pattern
+        # https://en.wikipedia.org/wiki/Post/Redirect/Get
+        return redirect(url_for("index"))
 
-    return render_template("index.html", title = "Test", posts = posts)
+    posts = current_user.followed_posts().all()
+
+    return render_template("index.html", title = "Test", posts = posts, form = form)
 
 @app.route("/login", methods = ["GET", "POST"])
 def login():
