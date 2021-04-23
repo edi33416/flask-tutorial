@@ -1,7 +1,8 @@
-flask-wtf
-flask-sqlalchemy
-flask-migrate
+email-validator
+flask-bootstrap
 flask-login
 flask-mail
+flask-migrate
+flask-sqlalchemy
+flask-wtf
 pyjwt
-email-validator

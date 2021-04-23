@@ -1,11 +1,11 @@
-<table>
-    <tr valign="top">
-        <td>
+<table class="table table-hover">
+    <tr>
+        <td class="col-xs-1">
             <a href={{url_for("user", username = post.author.username)}}>
-                <img src="{{ post.author.avatar(32) }}" />
+                <img src="{{ post.author.avatar(64) }}" />
             </a>
         </td>
-        <td>
+        <td class = "col-xs-11">
             <a href={{url_for("user", username = post.author.username)}}>
                 {{ post.author.username }}
             </a>
