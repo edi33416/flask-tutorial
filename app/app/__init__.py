@@ -7,6 +7,7 @@ from flask_bootstrap import Bootstrap
 from flask_login import LoginManager
 from flask_mail import Mail
 from flask_migrate import Migrate
+from flask_moment import Moment
 from flask_sqlalchemy import SQLAlchemy
 
 from config import Config
@@ -17,6 +18,7 @@ db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 mail = Mail(app)
 bootstrap = Bootstrap(app)
+moment = Moment(app)
 
 login = LoginManager(app)
 # Redirect users to login before accessing protected pages
