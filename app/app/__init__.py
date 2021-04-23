@@ -25,11 +25,14 @@ babel = Babel(app)
 
 login = LoginManager(app)
 # Redirect users to login before accessing protected pages
-login.login_view = "login"
+login.login_view = "auth.login"
 login.login_message = _LT("Please log in to access this page.")
 
 from app.errors import bp as errors_bp
 app.register_blueprint(errors_bp)
+
+from app.auth import bp as auth_bp
+app.register_blueprint(auth_bp)
 
 if not app.debug:
     # Setup email notifications for errors
