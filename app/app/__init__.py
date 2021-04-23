@@ -28,6 +28,9 @@ login = LoginManager(app)
 login.login_view = "login"
 login.login_message = _LT("Please log in to access this page.")
 
+from app.errors import bp as errors_bp
+app.register_blueprint(errors_bp)
+
 if not app.debug:
     # Setup email notifications for errors
     if app.config['MAIL_SERVER']:
