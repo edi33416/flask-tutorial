@@ -34,6 +34,9 @@ app.register_blueprint(errors_bp)
 from app.auth import bp as auth_bp
 app.register_blueprint(auth_bp)
 
+from app.main import bp as main_bp
+app.register_blueprint(main_bp)
+
 if not app.debug:
     # Setup email notifications for errors
     if app.config['MAIL_SERVER']:
@@ -76,4 +79,4 @@ def get_locale():
     """
     return request.accept_languages.best_match(app.config["LANGUAGES"])
 
-from app import routes, models, errors
+from app import models

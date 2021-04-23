@@ -1,7 +1,8 @@
 from datetime import datetime
 
 from app import app, db
-from app.forms import EmptyFollowForm, PostForm
+from app.main import bp
+from app.main.forms import EditProfileForm, EmptyFollowForm, PostForm
 from app.models import User, Post
 
 from flask import render_template, redirect, flash, url_for, request, g
@@ -9,8 +10,8 @@ from flask_babel import get_locale
 from flask_babel import gettext as _T
 from flask_login import current_user, login_required
 
-@app.route("/", methods = ["GET", "POST"])
-@app.route("/index", methods = ["GET", "POST"])
+@bp.route("/", methods = ["GET", "POST"])
+@bp.route("/index", methods = ["GET", "POST"])
 @login_required
 def index():
     form = PostForm()
@@ -22,7 +23,7 @@ def index():
 
         # Post/Redirect/Get pattern
         # https://en.wikipedia.org/wiki/Post/Redirect/Get
-        return redirect(url_for("index"))
+        return redirect(url_for("main.index"))
 
     # Paginate posts
     # A page can be passed as a request argument
@@ -31,16 +32,16 @@ def index():
     ret_404_on_empty_range = False
     posts = current_user.followed_posts().paginate(page, app.config['POSTS_PER_PAGE'], ret_404_on_empty_range)
 
-    next_url = url_for("index", page = posts.next_num)\
+    next_url = url_for("main.index", page = posts.next_num)\
             if posts.has_next else None
-    prev_url = url_for("index", page = posts.prev_num)\
+    prev_url = url_for("main.index", page = posts.prev_num)\
             if posts.has_prev else None
 
     return render_template("index.html", title = "Home", form = form,
             posts = posts.items, next_url = next_url, prev_url = prev_url)
 
 # Create a user page
-@app.route("/user/<username>")
+@bp.route("/user/<username>")
 @login_required
 def user(username):
     form = EmptyFollowForm()
@@ -54,15 +55,15 @@ def user(username):
     posts = user.posts.order_by(Post.timestamp.desc())\
                 .paginate(page, app.config['POSTS_PER_PAGE'], ret_404_on_empty_range)
 
-    next_url = url_for("user", username = username, page = posts.next_num)\
+    next_url = url_for("main.user", username = username, page = posts.next_num)\
             if posts.has_next else None
-    prev_url = url_for("user", username = username, page = posts.prev_num)\
+    prev_url = url_for("main.user", username = username, page = posts.prev_num)\
             if posts.has_prev else None
 
     return render_template("user.html", user = user, form = form,
             posts = posts.items, next_url = next_url, prev_url = prev_url)
 
-@app.route("/edit_profile", methods = ["GET", "POST"])
+@bp.route("/edit_profile", methods = ["GET", "POST"])
 @login_required
 def edit_profile():
     form = EditProfileForm(current_user.username)
@@ -72,7 +73,7 @@ def edit_profile():
         current_user.about_me = form.about_me.data
         db.session.commit()
         flash(_T("Your changes have been saved."))
-        return redirect(url_for("edit_profile"))
+        return redirect(url_for("main.edit_profile"))
     elif request.method == "GET":
         # A GET request is sent when the edit page is accessed
         form.username.data = current_user.username
@@ -88,7 +89,7 @@ def before_request():
 
     g.locale = str(get_locale())
 
-@app.route("/follow/<username>", methods = ["POST"])
+@bp.route("/follow/<username>", methods = ["POST"])
 @login_required
 def follow(username):
     form = EmptyFollowForm()
@@ -96,19 +97,19 @@ def follow(username):
         user = User.query.filter_by(username = username).first()
         if user is None:
             flash(_T("User %(username)s not found.", username = username))
-            return redirect(url_for("index"))
+            return redirect(url_for("main.index"))
         if user == current_user:
             flash(_T("You cannot follow yourself!"))
-            return redirect(url_for("user", username = username))
+            return redirect(url_for("main.user", username = username))
         current_user.follow(user)
         db.session.commit()
         flash(_T("You are following %(username)s!", username = username))
-        return redirect(url_for("user", username = username))
+        return redirect(url_for("main.user", username = username))
     else:
-        return redirect(url_for("index"))
+        return redirect(url_for("main.index"))
 
 
-@app.route("/unfollow/<username>", methods = ["POST"])
+@bp.route("/unfollow/<username>", methods = ["POST"])
 @login_required
 def unfollow(username):
     form = EmptyFollowForm()
@@ -116,18 +117,18 @@ def unfollow(username):
         user = User.query.filter_by(username = username).first()
         if user is None:
             flash(_T("User %(username)s not found.", username = username))
-            return redirect(url_for("index"))
+            return redirect(url_for("main.index"))
         if user == current_user:
             flash(_T("You cannot unfollow yourself!"))
-            return redirect(url_for("user", username = username))
+            return redirect(url_for("main.user", username = username))
         current_user.unfollow(user)
         db.session.commit()
         flash(_T("You are not following %(username)s.", username = username))
-        return redirect(url_for("user", username = username))
+        return redirect(url_for("main.user", username = username))
     else:
-        return redirect(url_for("index"))
+        return redirect(url_for("main.index"))
 
-@app.route("/explore")
+@bp.route("/explore")
 @login_required
 def explore():
     # Paginate posts
@@ -138,9 +139,9 @@ def explore():
     posts = Post.query.order_by(Post.timestamp.desc())\
             .paginate(page, app.config['POSTS_PER_PAGE'], ret_404_on_empty_range)
 
-    next_url = url_for("explore", page = posts.next_num)\
+    next_url = url_for("main.explore", page = posts.next_num)\
             if posts.has_next else None
-    prev_url = url_for("explore", page = posts.prev_num)\
+    prev_url = url_for("main.explore", page = posts.prev_num)\
             if posts.has_prev else None
 
     return render_template("index.html", title = "Explore", posts = posts.items,
