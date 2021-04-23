@@ -19,3 +19,6 @@ class Config(object):
 
     # Pagination config
     POSTS_PER_PAGE = 10
+
+    # i18n
+    LANGUAGES = ["en", "ro"]

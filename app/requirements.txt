@@ -1,4 +1,5 @@
 email-validator
+flask-babel
 flask-bootstrap
 flask-login
 flask-mail
