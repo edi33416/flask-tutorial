@@ -1,18 +1,29 @@
 from datetime import datetime, timedelta
 import unittest
-from app import app, db
+
+from app import create_app, db
 from app.models import User, Post
+from config import Config
+
+class TestConfig(Config):
+    TESTING = True
+    # Make unittests use a temporary, in-memory, db
+    SQLALCHEMY_DATABASE_URI = 'sqlite://'
 
 class UserModelCase(unittest.TestCase):
     def setUp(self):
-        # Hack to make unittests use a temporary, in-memory, db
-        app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite://"
+        self.app = create_app(TestConfig)
+        self.app_context = self.app.app_context()
+        # Push app context so current_app can proxy to it
+        self.app_context.push()
+
         # Create all the db tables
         db.create_all()
 
     def tearDown(self):
         db.session.remove()
         db.drop_all()
+        self.app_context.pop()
 
     def test_password_hashing(self):
         u = User(username="susan")
