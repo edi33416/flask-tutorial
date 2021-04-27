@@ -7,3 +7,6 @@ LABEL maintainer="eduard.c.staniloiu@gmail.com" \
 
 # Create app directory
 WORKDIR /app
+
+RUN apt update && \
+    apt install -y postgresql

@@ -8,3 +8,4 @@ flask-moment
 flask-sqlalchemy
 flask-wtf
 pyjwt
+psycopg2
