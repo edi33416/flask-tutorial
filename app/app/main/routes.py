@@ -1,11 +1,11 @@
 from datetime import datetime
 
-from app import app, db
+from app import db
 from app.main import bp
 from app.main.forms import EditProfileForm, EmptyFollowForm, PostForm
 from app.models import User, Post
 
-from flask import render_template, redirect, flash, url_for, request, g
+from flask import render_template, redirect, flash, url_for, request, g, current_app
 from flask_babel import get_locale
 from flask_babel import gettext as _T
 from flask_login import current_user, login_required
@@ -30,7 +30,8 @@ def index():
     # Ex. /index?page=3
     page = request.args.get(key = 'page', default = 1, type = int)
     ret_404_on_empty_range = False
-    posts = current_user.followed_posts().paginate(page, app.config['POSTS_PER_PAGE'], ret_404_on_empty_range)
+    posts = current_user.followed_posts()\
+                        .paginate(page, current_app.config['POSTS_PER_PAGE'], ret_404_on_empty_range)
 
     next_url = url_for("main.index", page = posts.next_num)\
             if posts.has_next else None
@@ -53,7 +54,7 @@ def user(username):
     page = request.args.get(key = 'page', default = 1, type = int)
     ret_404_on_empty_range = False
     posts = user.posts.order_by(Post.timestamp.desc())\
-                .paginate(page, app.config['POSTS_PER_PAGE'], ret_404_on_empty_range)
+                .paginate(page, current_app.config['POSTS_PER_PAGE'], ret_404_on_empty_range)
 
     next_url = url_for("main.user", username = username, page = posts.next_num)\
             if posts.has_next else None
@@ -81,7 +82,7 @@ def edit_profile():
     return render_template("edit_profile.html", title = "Edit Profile", form = form)
 
 # Log user last access time before any request
-@app.before_request
+@bp.before_request
 def before_request():
     if current_user.is_authenticated:
         current_user.last_seen = datetime.utcnow()
@@ -137,7 +138,7 @@ def explore():
     page = request.args.get(key = 'page', default = 1, type = int)
     ret_404_on_empty_range = False
     posts = Post.query.order_by(Post.timestamp.desc())\
-            .paginate(page, app.config['POSTS_PER_PAGE'], ret_404_on_empty_range)
+            .paginate(page, current_app.config['POSTS_PER_PAGE'], ret_404_on_empty_range)
 
     next_url = url_for("main.explore", page = posts.next_num)\
             if posts.has_next else None
