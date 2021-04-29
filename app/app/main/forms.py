@@ -1,5 +1,6 @@
 from flask_babel import lazy_gettext as _LT
 from flask_wtf import FlaskForm
+from flask_wtf.file import FileField, FileRequired, FileAllowed
 from wtforms import StringField, TextAreaField, PasswordField, BooleanField, SubmitField
 from wtforms.validators import ValidationError, DataRequired, Email, EqualTo, Length
 
@@ -38,3 +39,8 @@ class EmptyFollowForm(FlaskForm):
 class PostForm(FlaskForm):
     post = TextAreaField(_LT("Say something:"), validators = [DataRequired(), Length(min = 1, max = 140)])
     submit = SubmitField(_LT("Submit"))
+
+class UploadImagesForm(FlaskForm):
+    file = FileField(_LT("File"), validators = [FileRequired(), FileAllowed(["png"])])
+    submit = SubmitField(_LT("Submit"))
+

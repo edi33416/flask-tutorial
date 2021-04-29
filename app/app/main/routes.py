@@ -2,13 +2,14 @@ from datetime import datetime
 
 from app import db
 from app.main import bp
-from app.main.forms import EditProfileForm, EmptyFollowForm, PostForm
+from app.main.forms import EditProfileForm, EmptyFollowForm, PostForm, UploadImagesForm
 from app.models import User, Post
 
 from flask import render_template, redirect, flash, url_for, request, g, current_app
 from flask_babel import get_locale
 from flask_babel import gettext as _T
 from flask_login import current_user, login_required
+from werkzeug.utils import secure_filename
 
 @bp.route("/", methods = ["GET", "POST"])
 @bp.route("/index", methods = ["GET", "POST"])
@@ -148,7 +149,23 @@ def explore():
     return render_template("index.html", title = "Explore", posts = posts.items,
             next_url = next_url, prev_url = prev_url)
 
+@bp.route("/upload", methods = ["GET", "POST"])
+@login_required
+def upload():
+    form = UploadImagesForm()
+    if request.method == "POST":
+        uploaded_file = request.files['file']
+        for uploaded_file in request.files.getlist('file'):
+            if uploaded_file.filename != '':
+                #uploaded_file.save(uploaded_file.filename)
+                print(secure_filename(uploaded_file.filename))
 
+        flash(_T("Your images have been submitted for processing"))
 
+        # Post/Redirect/Get pattern
+        # https://en.wikipedia.org/wiki/Post/Redirect/Get
+        return redirect(url_for("main.index"))
+
+    return render_template("upload.html", title = "Upload Images", form = form)
 
 
